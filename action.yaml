@@ -1,0 +1,39 @@
+name: create-release
+description: ''
+inputs:
+  init_version:
+    description: ''
+    required: false
+    default: 1.0.0
+  tag_partial_versions:
+    description: ''
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - uses: ptonini-actions/config-git-user@v1
+
+    - uses: grumpy-programmer/conventional-commits-semver-release@v1
+      id: semver
+      with:
+        init-version: ${{ inputs.init_version }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: tag version
+      if: steps.semver.outputs.released
+      run: git tag ${{ steps.semver.outputs.tag }}
+      shell: bash
+
+    - name: tag partial versions
+      if: steps.semver.outputs.released && inputs.tag_partial_versions == 'true'
+      run: |
+        git tag -f ${{ steps.semver.outputs.tag-prefix }}${{ steps.semver.outputs.version-major }}
+        git tag -f ${{ steps.semver.outputs.tag-prefix }}${{ steps.semver.outputs.version-major }}.${{ steps.semver.outputs.version-minor }}
+      shell: bash
+
+    - name: push tags
+      if: steps.semver.outputs.released
+      run: git push --tags --force
+      shell: bash
