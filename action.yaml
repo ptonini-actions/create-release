@@ -8,12 +8,10 @@ inputs:
   tag_partial_versions:
     description: ''
     required: false
-    default: 'true'
+    default: 'false'
 runs:
   using: composite
   steps:
-    - uses: ptonini-actions/config-git-user@v1
-
     - uses: grumpy-programmer/conventional-commits-semver-release@v1
       id: semver
       with:
